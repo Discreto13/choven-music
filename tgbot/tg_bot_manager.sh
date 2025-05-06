@@ -65,6 +65,7 @@ while true; do
             send_message "Collecting data..."
             AUTHORS=$(../picoreplayer/scan_authors.sh $MUSIC_DIR --silent 2>/dev/null)
             split_and_send "$AUTHORS"
+            send_message "-- end ---"
         else
             send_message "❓ Unknown command"
         fi
