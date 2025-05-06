@@ -3,10 +3,10 @@
 set -e
 
 show_help() {
-    echo "Usage: $0 -n \"author - song.mp3\" -y <youtube_url> -d <destination_dir> [--new-author]"
+    echo "Usage: $0 -n \"author - song\" -y <youtube_url> -d <destination_dir> [--new-author]"
     echo ""
     echo "Parameters:"
-    echo "  -n     Song name in format \"Author - Song.mp3\""
+    echo "  -n     Song name in format \"Author - Song\" ('.mp3' is optional)"
     echo "  -y     YouTube URL to download audio"
     echo "  -d     Target directory where to put the final file"
     echo "  --new-author   Skip author existence check"
@@ -15,7 +15,7 @@ show_help() {
 
 NEW_AUTHOR=false
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case $1 in
         -n)
             NAME="$2"
@@ -45,21 +45,28 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ -z "$NAME" || -z "$YOUTUBE_URL" || -z "$DEST_DIR" ]]; then
+if [ -z "$NAME" ] || [ -z "$YOUTUBE_URL" ] || [ -z "$DEST_DIR" ]; then
     echo "❌ Parameters -n, -y, and -d are required."
     show_help
     exit 1
 fi
 
-if [[ "$NAME" != *" - "*".mp3" ]]; then
-    echo "❌ Name must be in format 'Author - Song.mp3'"
+# Add .mp3 if missing
+case "$NAME" in
+    *.mp3) ;;
+    *) NAME="$NAME.mp3" ;;
+esac
+
+# Validate format
+if echo "$NAME" | grep -qv " - .*\.mp3$"; then
+    echo "❌ Name must be in format 'Author - Song'"
     exit 1
 fi
 
 AUTHOR=$(echo "$NAME" | awk -F ' - ' '{print $1}')
 TITLE=$(echo "$NAME" | awk -F ' - ' '{print $2}' | sed 's/\.mp3$//')
 
-if [[ "$NEW_AUTHOR" = false ]]; then
+if [ "$NEW_AUTHOR" = false ]; then
     AUTHORS=$(./scan_authors.sh "$DEST_DIR" --silent)
     if ! echo "$AUTHORS" | grep -Fxq "$AUTHOR"; then
         echo "❌ Author '$AUTHOR' not found in library."
@@ -67,7 +74,7 @@ if [[ "$NEW_AUTHOR" = false ]]; then
     fi
 fi
 
-if [[ -f "$DEST_DIR/$NAME" ]]; then
+if [ -f "$DEST_DIR/$NAME" ]; then
     echo "❌ Song '$NAME' already exists in destination directory."
     exit 1
 fi
@@ -95,3 +102,4 @@ if ! mv "$TMP_FILE" "$DEST_DIR/"; then
 fi
 
 echo "✅ Successfully added '$NAME' to '$DEST_DIR'"
+

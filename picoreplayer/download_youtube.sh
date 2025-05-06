@@ -50,7 +50,7 @@ if [[ -z "$FILENAME" ]]; then
 fi
 
 echo "🎵 Downloading from YouTube..."
-if ! yt-dlp -f 'bestaudio' --extract-audio --audio-format mp3 --audio-quality 0 \
+if ! yt-dlp --quiet -f 'bestaudio' --extract-audio --audio-format mp3 --audio-quality 0 \
     -o "${FILENAME}.%(ext)s" "$URL"; then
     echo "❌ Failed to download from YouTube."
     exit 1
