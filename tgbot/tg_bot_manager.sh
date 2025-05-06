@@ -62,6 +62,7 @@ while true; do
     # Парсимо текст повідомлення
     echo "$UPDATES" | grep -o '"text":"[^"]*' | cut -d':' -f2- | cut -d'"' -f2 | while read message_text; do
         if [ "$message_text" = "/authors" ]; then
+            send_message "Collecting data..."
             AUTHORS=$(../picoreplayer/scan_authors.sh $MUSIC_DIR --silent 2>/dev/null)
             split_and_send "$AUTHORS"
         else
