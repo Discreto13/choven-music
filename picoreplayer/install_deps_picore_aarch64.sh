@@ -2,6 +2,9 @@
 
 set -e
 
+echo "➡️ Installing curl"
+tce-load -wi curl
+
 echo "➡️ Creating directory /home/tc/local/bin"
 mkdir -p /home/tc/local/bin
 
