@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 show_help() {
     echo "Usage: $0 -y <YouTube URL> -o <output file name without .mp3>"
