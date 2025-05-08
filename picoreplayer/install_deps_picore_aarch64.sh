@@ -31,6 +31,10 @@ echo "➡️ Downloading yt-dlp binary for $ARCH"
 wget "$YT_DLP_URL" -O /home/tc/local/bin/yt-dlp
 chmod +x /home/tc/local/bin/yt-dlp
 
+echo "➡️ Downloading jq binary for $ARCH"
+wget https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-arm64 -O /home/tc/local/bin/jq
+chmod +x /home/tc/local/bin/jq
+
 echo "➡️ Adding /home/tc/local/bin to PATH"
 export PATH=/home/tc/local/bin:$PATH
 if ! grep -q 'export PATH=/home/tc/local/bin:$PATH' /home/tc/.profile; then
