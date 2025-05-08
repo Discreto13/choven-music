@@ -2,6 +2,8 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 show_help() {
     echo "Usage: $0 -n \"author - song\" -y <youtube_url> -d <destination_dir> [--new-author]"
     echo ""
@@ -67,7 +69,8 @@ AUTHOR=$(echo "$NAME" | awk -F ' - ' '{print $1}')
 TITLE=$(echo "$NAME" | awk -F ' - ' '{print $2}' | sed 's/\.mp3$//')
 
 if [ "$NEW_AUTHOR" = false ]; then
-    AUTHORS=$(./scan_authors.sh "$DEST_DIR" --silent)
+    echo "🎵 Naming validation..."
+    AUTHORS=$("$SCRIPT_DIR/scan_authors.sh" "$DEST_DIR" --silent)
     if ! echo "$AUTHORS" | grep -Fxq "$AUTHOR"; then
         echo "❌ Author '$AUTHOR' not found in library."
         exit 1
@@ -79,18 +82,18 @@ if [ -f "$DEST_DIR/$NAME" ]; then
     exit 1
 fi
 
-TMP_DIR="./tmp"
+TMP_DIR="$SCRIPT_DIR/tmp"
 mkdir -p "$TMP_DIR"
 TMP_FILE="$TMP_DIR/$NAME"
 
 echo "🎵 Calling download_youtube.sh..."
-if ! ./download_youtube.sh -y "$YOUTUBE_URL" -o "$TMP_DIR/${NAME%.mp3}"; then
+if ! "$SCRIPT_DIR/download_youtube.sh" -y "$YOUTUBE_URL" -o "$TMP_DIR/${NAME%.mp3}"; then
     echo "❌ Failed to download from YouTube."
     rm -f "$TMP_FILE"
     exit 1
 fi
 
-if ! ./update_mp3_tags.sh "$TMP_FILE"; then
+if ! "$SCRIPT_DIR/update_mp3_tags.sh" "$TMP_FILE"; then
     echo "❌ Failed to update mp3 tags."
     rm -f "$TMP_FILE"
     exit 1
