@@ -69,7 +69,6 @@ AUTHOR=$(echo "$NAME" | awk -F ' - ' '{print $1}')
 TITLE=$(echo "$NAME" | awk -F ' - ' '{print $2}' | sed 's/\.mp3$//')
 
 if [ "$NEW_AUTHOR" = false ]; then
-    echo "🎵 Naming validation..."
     AUTHORS=$("$SCRIPT_DIR/scan_authors.sh" "$DEST_DIR" --silent)
     if ! echo "$AUTHORS" | grep -Fxq "$AUTHOR"; then
         echo "❌ Author '$AUTHOR' not found in library."
