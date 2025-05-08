@@ -77,8 +77,7 @@ while true; do
     done
 
     # Process message text
-    # echo "$UPDATES" | jq -r '.result[].message.text' | while read message_text; do
-    jq -r '.result[].message.text' <<< "$UPDATES" > /tmp/tg_updates.txt
+    echo "$UPDATES" | jq -r '.result[].message.text' > /tmp/tg_updates.txt
     while read message_text; do
         echo "Received: $message_text"
 
@@ -109,7 +108,7 @@ while true; do
 
             echo "Executing: $CMD"
             OUTPUT=$(eval "$CMD" 2>&1)
-            send_message "Logs: $OUTPUT"
+            send_message "$OUTPUT"
 
             # Reset state
             YOUTUBE_URL=""
