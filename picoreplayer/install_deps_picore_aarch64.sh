@@ -44,7 +44,18 @@ if ! grep -q "export PATH=.*${LOCAL_BIN}" /home/tc/.profile; then
     export PATH="$LOCAL_BIN:$PATH"
 fi
 
-echo "➡️ Saving changes to backup"
-# filetool.sh -b
+
+# Ask user about backup
+echo ""
+echo "📝 Do you want to save these binaries permanently (persist after reboot)?"
+read -p "👉 Type 'y' to backup, or any other key to skip: " DO_BACKUP
+
+if [ "$DO_BACKUP" = "y" ]; then
+    echo "➡️  Saving changes to backup (filetool.sh -b)"
+    filetool.sh -b
+    echo "✅  Backup completed."
+else
+    echo "⚠️  Skipping backup. Changes will be lost after reboot."
+fi
 
 echo "✅ Installation and backup completed successfully!"
