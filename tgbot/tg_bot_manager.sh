@@ -67,6 +67,7 @@ YOUTUBE_URL=""
 TRACK_NAME=""
 NEW_AUTHOR=false
 
+echo "Tg bot started"
 while true; do
     UPDATES=$(get_updates)
 
