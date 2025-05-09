@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Switch to script's directory
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+cd "$SCRIPT_DIR"
+
 # Load .env variables
 if [ -f ".env" ]; then
     . ./.env
