@@ -45,9 +45,9 @@ send_message() {
 split_and_send() {
     CHUNK=""
     COUNT=0
-    MAX_LINES=30
+    MAX_LINES=80
 
-    echo "$1" | while read line; do
+    while IFS= read -r line; do
         [ -z "$line" ] && continue
         CHUNK="$CHUNK$line
 "
@@ -87,11 +87,19 @@ while true; do
         echo "Received: $message_text"
 
         # process as multiline message as tg provides updates exactly that way
-        if [ "$message_text" = "/authors" ]; then
+        if echo "$message_text" | grep -q "^/authors"; then
             send_message "Collecting data..."
-            AUTHORS=$(../picoreplayer/scan_authors.sh $MUSIC_DIR --silent 2>/dev/null)
-            split_and_send "$AUTHORS"
-            send_message "-- end ---"
+            AUTHORS=$(find "$MUSIC_DIR" -type f -iname "*.mp3" | sed -E 's|.*/([^/]+) - .*\.mp3|\1|' | sort | uniq)
+            echo "$AUTHORS" | split_and_send
+            send_message "------- that's all -------"
+
+        elif echo "$message_text" | grep -q "^/songs_of "; then
+            AUTHOR=$(echo "$message_text" | sed 's|^/songs_of ||')
+            echo "Get songs of author '$AUTHOR'"
+            SONGS=$(find "$MUSIC_DIR" -type f -iname "*.mp3" | grep "/$AUTHOR - ")
+            TITLES=$(echo "$SONGS" | sed -E 's|.*/[^-]+ - (.*)\.mp3|\1|')
+            echo "$TITLES" | split_and_send
+
         elif [ "$message_text" = "/new_author" ]; then
             NEW_AUTHOR=true
             send_message "✅ New author flag set."
