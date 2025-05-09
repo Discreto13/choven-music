@@ -4,26 +4,26 @@ set -e
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 BOT_SCRIPT="$SCRIPT_DIR/tg_bot_manager.sh"
+LOG_FILE="$SCRIPT_DIR/tg_bot_prod.log"
+BOOTLOCAL="/opt/bootlocal.sh"
+MARKER="# tg_bot_manager.sh autorun"
+CMD_LINE="( $BOT_SCRIPT </dev/null | tee -a $LOG_FILE ) &"
 
+echo "➡️ Checking if tg_bot_manager.sh exists..."
 if [ ! -f "$BOT_SCRIPT" ]; then
     echo "❌ tg_bot_manager.sh not found in $SCRIPT_DIR"
     exit 1
 fi
 
-BOOTLOCAL="/opt/bootlocal.sh"
-MARKER="# tg_bot_manager.sh autorun"
-
 echo "➡️ Setting up autorun in $BOOTLOCAL"
 
-# Check if already exists
+# Check if marker already exists
 if grep -q "$MARKER" "$BOOTLOCAL"; then
     echo "✅ Autorun already configured."
 else
-    # echo "$MARKER" | sudo tee -a "$BOOTLOCAL" >/dev/null
-    # echo "$BOT_SCRIPT &" | sudo tee -a "$BOOTLOCAL" >/dev/null
-    # Insert before #pCPstop------
-    sudo sed -i "/#pCPstop------/i $MARKER\n$BOT_SCRIPT \&" "$BOOTLOCAL"
-    echo "✅ Autorun line added."
+    # Insert marker and command above #pCPstop------
+    sudo sed -i "/#pCPstop------/i $MARKER\n$CMD_LINE" "$BOOTLOCAL"
+    echo "✅ Autorun line added above #pCPstop------."
 fi
 
 echo "➡️ Adding bootlocal.sh to backup list..."
@@ -35,4 +35,4 @@ fi
 echo "➡️ Saving backup to persist changes..."
 sudo filetool.sh -b
 
-echo "🎉 Setup complete! The bot will autostart at boot."
+echo "🎉 Setup complete! The bot will autostart at boot with logging to console + $LOG_FILE"
