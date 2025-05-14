@@ -56,3 +56,4 @@ for f in "$TMP_DIR"/*.mp3; do
 done
 
 mv "$TMP_DIR"/*.mp3 "$MUSIC_DIR/"
+rm -r "$TMP_DIR"
