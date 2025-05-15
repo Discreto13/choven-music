@@ -38,7 +38,7 @@ TMP_DIR="$MUSIC_DIR/tmp"
 mkdir -p "$TMP_DIR"
 
 yt-dlp --format bestaudio --extract-audio --audio-format mp3 --audio-quality 0 --add-metadata \
- -o "$TMP_DIR/%(id)s.%(ext)s-tmp" \
+ -o "$TMP_DIR/%(id)s.%(ext)s" \
  --download-archive "$MUSIC_DIR/downloaded.txt" -i "$PLAYLIST_URL"
 
 # For multi-authors tracks, fix filename and metadata
@@ -61,7 +61,7 @@ for f in "$TMP_DIR"/*.mp3; do
     newname="$TMP_DIR/$first_artist - $title.mp3"
     mv -v "$f" "$newname"
 
-    # Rewrite artist tag
+    # Rewrite artist tag with just first one, since pcp not supports multi-artists metadata
     ffmpeg -i "$newname" -codec copy -metadata artist="$first_artist" "${newname}.fixed.mp3" -y
     mv "${newname}.fixed.mp3" "$newname"
 done
