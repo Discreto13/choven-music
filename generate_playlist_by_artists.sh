@@ -43,6 +43,12 @@ if [ -z "$MUSIC_DIR" ] || [ -z "$ARTISTS_FILE" ] || [ -z "$PLAYLIST_FILE" ]; the
   show_help
 fi
 
+# Ensure artists file exists
+if [ ! -f "$ARTISTS_FILE" ]; then
+  echo "❌ Artists file not found: $ARTISTS_FILE"
+  exit 1
+fi
+
 # Check if playlist directory exists
 PLAYLIST_DIR=$(dirname "$PLAYLIST_FILE")
 if [ ! -d "$PLAYLIST_DIR" ]; then
@@ -50,7 +56,7 @@ if [ ! -d "$PLAYLIST_DIR" ]; then
   exit 1
 fi
 
-# Ensure file exists
+# Ensure playlist file exists
 touch "$PLAYLIST_FILE"
 TMP_PLAYLIST=$(mktemp)
 sort "$PLAYLIST_FILE" | uniq > "$TMP_PLAYLIST"
