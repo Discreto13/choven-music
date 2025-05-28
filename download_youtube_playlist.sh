@@ -62,12 +62,11 @@ for f in "$TMP_DIR"/*.mp3; do
     mv -v "$f" "$newname"
 
     # Rewrite artist tag with just first one, since pcp not supports multi-artists metadata
-    ffmpeg -i "$newname" -codec copy -metadata artist="$first_artist" "${newname}.fixed.mp3" -y
+    ffmpeg -hide_banner -loglevel error -i "$newname" -codec copy -metadata artist="$first_artist" "${newname}.fixed.mp3" -y
     mv "${newname}.fixed.mp3" "$newname"
 
     # Add replaygain tags to be used by player for volume normalization
-    ffmpeg -i "$newname" -filter:a "replaygain" -c:a libmp3lame -q:a 0 "${newname}.rgain.mp3" -y
-    mv "${newname}.rgain.mp3" "$newname"
+    # replaygain_tagger.sh
 done
 
 set -- "$TMP_DIR"/*.mp3
