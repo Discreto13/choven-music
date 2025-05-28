@@ -30,8 +30,8 @@ find "$INPUT" -type f -iname "*.mp3" | while IFS= read -r f; do
 
   OUTPUT=$(ffmpeg -i "$f" -filter:a "replaygain" -f null - 2>&1)
 
-  GAIN=$(echo "$OUTPUT" | sed -n 's/.*track_gain: \([-0-9\.]*\) dB.*/\1/p')
-  PEAK=$(echo "$OUTPUT" | sed -n 's/.*track_peak: \([0-9\.]*\).*/\1/p')
+  GAIN=$(echo "$OUTPUT" | sed -n 's/.*track_gain = \([-0-9\.]*\) dB.*/\1/p')
+  PEAK=$(echo "$OUTPUT" | sed -n 's/.*track_peak = \([0-9\.]*\).*/\1/p')
 
   if [ -n "$GAIN" ] && [ -n "$PEAK" ]; then
     echo "📊 Gain: $GAIN dB, Peak: $PEAK"

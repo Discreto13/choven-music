@@ -64,10 +64,12 @@ for f in "$TMP_DIR"/*.mp3; do
     # Rewrite artist tag with just first one, since pcp not supports multi-artists metadata
     ffmpeg -hide_banner -loglevel error -i "$newname" -codec copy -metadata artist="$first_artist" "${newname}.fixed.mp3" -y
     mv "${newname}.fixed.mp3" "$newname"
-
-    # Add replaygain tags to be used by player for volume normalization
-    # replaygain_tagger.sh
 done
+
+
+# Add replaygain tags to be used by player for volume normalization
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+"$SCRIPT_DIR/replaygain_tagger.sh" "$TMP_DIR"
 
 set -- "$TMP_DIR"/*.mp3
 if [ -e "$1" ]; then
