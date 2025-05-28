@@ -1,5 +1,7 @@
 #!/bin/sh
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 # Get required arguments
 while getopts p:d: flag; do
     case "${flag}" in
@@ -9,8 +11,21 @@ while getopts p:d: flag; do
     esac
 done
 
+# Fallback to .env if not provided
 if [ -z "$PLAYLIST_URL" ] || [ -z "$MUSIC_DIR" ]; then
+    ENV_FILE="$SCRIPT_DIR/.env"
+    if [ -f "$ENV_FILE" ]; then
+        . "$ENV_FILE"
+    fi
+fi
+
+# Final check
+if [ -z "$PLAYLIST_URL" ] || [ -z "$MUSIC_DIR" ]; then
+    echo "❌ Missing required parameters."
     echo "Usage: $0 -p playlist_url -d music_dir"
+    echo "Or provide them in $SCRIPT_DIR/.env as:"
+    echo "PLAYLIST_URL='https://...'"
+    echo "MUSIC_DIR='/path/to/music'"
     exit 1
 fi
 
@@ -68,7 +83,6 @@ done
 
 
 # Add replaygain tags to be used by player for volume normalization
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 "$SCRIPT_DIR/replaygain_tagger.sh" "$TMP_DIR"
 
 set -- "$TMP_DIR"/*.mp3
