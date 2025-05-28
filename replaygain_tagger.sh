@@ -41,7 +41,7 @@ find "$INPUT" -type f -iname "*.mp3" | while IFS= read -r f; do
       -metadata REPLAYGAIN_TRACK_PEAK="$PEAK" \
       "${f%.mp3}.gain.mp3" -y
 
-    mv -v "${f%.mp3}.gain.mp3" "$f"
+    mv "${f%.mp3}.gain.mp3" "$f"
   else
     echo "⚠️  Could not extract ReplayGain info for: $f"
   fi
