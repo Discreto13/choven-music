@@ -29,7 +29,7 @@ done
 
 # === Create a unique temporary log file ===
 
-TMP_LOG="$(mktemp /tmp/loudnorm_log.json)" || {
+TMP_LOG="$(mktemp)" || {
   echo "❌ Failed to create temporary file"
   exit 1
 }
