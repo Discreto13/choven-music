@@ -61,11 +61,11 @@ normalize_file() {
   fi
 
   # Extract measured values
-  I=$(grep "input_i" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
-  TP=$(grep "input_tp" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
-  LRA=$(grep "input_lra" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
-  THRESH=$(grep "input_thresh" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
-  OFFSET=$(grep "target_offset" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
+  I=$(grep "input_i" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d '", ')
+  TP=$(grep "input_tp" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d '", ')
+  LRA=$(grep "input_lra" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d '", ')
+  THRESH=$(grep "input_thresh" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d '", ')
+  OFFSET=$(grep "target_offset" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d '", ')
 
   tmpfile="${f%.mp3}.normalized.mp3"
 
