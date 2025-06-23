@@ -99,7 +99,7 @@ INPUT="$1"
 if [ -f "$INPUT" ] && echo "$INPUT" | grep -q "\.mp3$"; then
   normalize_file "$INPUT" || exit 1
 elif [ -d "$INPUT" ]; then
-  find "$INPUT" -type f -name "*.mp3" | while read file; do
+  find "$INPUT" -type f -name "*.mp3" -print0 | while IFS= read -r -d '' file; do
     normalize_file "$file" || echo "⚠️ Skipped: $file"
   done
 else
