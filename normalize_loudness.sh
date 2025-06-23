@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 SCRIPT_NAME="$(basename "$0")"
 
@@ -18,10 +18,23 @@ TARGET_TP="-1.5"
 # Common: 11 (default), 8 (moderate compression), 5 (flat)
 TARGET_LRA="8"
 
-# Create a unique temporary file for loudnorm log
-TMP_LOG="$(mktemp /tmp/loudnorm_log.json)"
+# === Check required tools ===
 
-# Clean up the temporary log file on exit
+for cmd in ffmpeg grep awk tr basename find mktemp mv; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "❌ Required command not found: $cmd"
+    exit 1
+  fi
+done
+
+# === Create a unique temporary log file ===
+
+TMP_LOG="$(mktemp /tmp/loudnorm_log.json)" || {
+  echo "❌ Failed to create temporary file"
+  exit 1
+}
+
+# Cleanup on exit
 trap 'rm -f "$TMP_LOG"' EXIT
 
 show_help() {
@@ -37,40 +50,57 @@ show_help() {
 }
 
 normalize_file() {
-  local f="$1"
+  f="$1"
   echo "🔊 Processing $f..."
 
+  # First pass
   ffmpeg -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:print_format=json -f null - 2> "$TMP_LOG"
+  if [ $? -ne 0 ]; then
+    echo "❌ ffmpeg failed on first pass: $f"
+    return 1
+  fi
 
-  I=$(grep "input_i" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ')
-  TP=$(grep "input_tp" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ')
-  LRA=$(grep "input_lra" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ')
-  THRESH=$(grep "input_thresh" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ')
-  OFFSET=$(grep "target_offset" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ')
+  # Extract measured values
+  I=$(grep "input_i" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
+  TP=$(grep "input_tp" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
+  LRA=$(grep "input_lra" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
+  THRESH=$(grep "input_thresh" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
+  OFFSET=$(grep "target_offset" "$TMP_LOG" | awk -F: '{ print $2 }' | tr -d ', ') || return 1
 
   tmpfile="${f%.mp3}.normalized.mp3"
 
+  # Second pass
   ffmpeg -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:measured_I=$I:measured_TP=$TP:measured_LRA=$LRA:measured_thresh=$THRESH:offset=$OFFSET:linear=true:print_format=summary "$tmpfile"
+  if [ $? -ne 0 ]; then
+    echo "❌ ffmpeg failed on second pass: $f"
+    rm -f "$tmpfile"
+    return 1
+  fi
 
   mv "$tmpfile" "$f"
+  if [ $? -ne 0 ]; then
+    echo "❌ Failed to overwrite original file: $f"
+    rm -f "$tmpfile"
+    return 1
+  fi
 
   echo "✅ Normalized $f"
 }
 
 # === Entry Point ===
 
-if [[ $# -eq 0 || "$1" == "--help" ]]; then
+if [ $# -eq 0 ] || [ "$1" = "--help" ]; then
   show_help
   exit 0
 fi
 
 INPUT="$1"
 
-if [[ -f "$INPUT" && "$INPUT" == *.mp3 ]]; then
-  normalize_file "$INPUT"
-elif [[ -d "$INPUT" ]]; then
-  find "$INPUT" -type f -name "*.mp3" | while read -r file; do
-    normalize_file "$file"
+if [ -f "$INPUT" ] && echo "$INPUT" | grep -q "\.mp3$"; then
+  normalize_file "$INPUT" || exit 1
+elif [ -d "$INPUT" ]; then
+  find "$INPUT" -type f -name "*.mp3" | while read file; do
+    normalize_file "$file" || echo "⚠️ Skipped: $file"
   done
 else
   echo "❌ Invalid input: must be an .mp3 file or a directory."
