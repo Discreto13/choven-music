@@ -54,7 +54,7 @@ normalize_file() {
   echo "🔊 Processing $f..."
 
   # First pass
-  ffmpeg -y -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:print_format=json -f null - 2> "$TMP_LOG"
+  ffmpeg -hide_banner -loglevel error -y -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:print_format=json -f null - 2> "$TMP_LOG"
   if [ $? -ne 0 ]; then
     echo "❌ ffmpeg failed on first pass: $f"
     return 1
@@ -70,7 +70,7 @@ normalize_file() {
   tmpfile="${f%.mp3}.normalized.mp3"
 
   # Second pass
-  ffmpeg -y -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:measured_I=$I:measured_TP=$TP:measured_LRA=$LRA:measured_thresh=$THRESH:offset=$OFFSET:linear=true:print_format=summary "$tmpfile"
+  ffmpeg -hide_banner -loglevel error -y -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:measured_I=$I:measured_TP=$TP:measured_LRA=$LRA:measured_thresh=$THRESH:offset=$OFFSET:linear=true:print_format=summary "$tmpfile"
   if [ $? -ne 0 ]; then
     echo "❌ ffmpeg failed on second pass: $f"
     cat "$TMP_LOG"
