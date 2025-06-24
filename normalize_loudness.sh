@@ -102,7 +102,7 @@ if [ -f "$INPUT" ] && echo "$INPUT" | grep -q "\.mp3$"; then
 elif [ -d "$INPUT" ]; then
   for f in "$INPUT"/*.mp3; do
     [ -e "$f" ] || continue
-    normalize_file "$file" || echo "⚠️ Skipped: $file"
+    normalize_file "$f" || echo "⚠️ Skipped: $f"
   done
 else
   echo "❌ Invalid input: must be an .mp3 file or a directory."
