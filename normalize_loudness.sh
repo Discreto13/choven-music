@@ -73,6 +73,7 @@ normalize_file() {
   ffmpeg -y -i "$f" -af loudnorm=I=$TARGET_I:TP=$TARGET_TP:LRA=$TARGET_LRA:measured_I=$I:measured_TP=$TP:measured_LRA=$LRA:measured_thresh=$THRESH:offset=$OFFSET:linear=true:print_format=summary "$tmpfile"
   if [ $? -ne 0 ]; then
     echo "❌ ffmpeg failed on second pass: $f"
+    cat "$TMP_LOG"
     rm -f "$tmpfile"
     return 1
   fi
@@ -99,7 +100,8 @@ INPUT="$1"
 if [ -f "$INPUT" ] && echo "$INPUT" | grep -q "\.mp3$"; then
   normalize_file "$INPUT" || exit 1
 elif [ -d "$INPUT" ]; then
-  find "$INPUT" -type f -name "*.mp3" -print0 | while IFS= read -r -d '' file; do
+  for f in "$INPUT"/*.mp3; do
+    [ -e "$f" ] || continue
     normalize_file "$file" || echo "⚠️ Skipped: $file"
   done
 else
